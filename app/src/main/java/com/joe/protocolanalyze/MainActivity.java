@@ -6,7 +6,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import joe.protocol.main.ProtocolFactory;
+import joe.protocol.throwable.ConstantsValueNullException;
+import joe.protocol.throwable.NotInitProtocolException;
 import joe.protocol.throwable.ParamsNumNotMatchVarNumException;
+import joe.protocol.utils.HexUtils;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -15,10 +18,31 @@ public class MainActivity extends AppCompatActivity {
             "    \"body\": [\n" +
             "        {\n" +
             "            \"type\": \"constants\",\n" +
+            "            \"value\": \"0xa5\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"constants\",\n" +
+            "            \"value\": \"0x04\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"constants\",\n" +
             "            \"value\": \"0x83\"\n" +
             "        },\n" +
             "        {\n" +
             "            \"type\": \"var\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"var\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"var\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"var\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"constants\",\n" +
+            "            \"value\": \"0x7e\"\n" +
             "        }\n" +
             "    ]\n" +
             "}";
@@ -28,15 +52,20 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ProtocolFactory factory = new ProtocolFactory();
-        factory.initProtocol(jsonstring);
-        String commands = "";
         try {
-            commands = factory.getCommandsString("0xaa");
-        } catch (ParamsNumNotMatchVarNumException e) {
+            factory.initProtocol(jsonstring);
+        } catch (ConstantsValueNullException e) {
             e.printStackTrace();
-            System.out.println("joe------" + e.toString());
         }
-        System.out.println("joe---------" + commands);
+        try {
+            byte[] commands;
+            commands = factory.getBytesCommands("0xaa", "0xbb", "0xcc", "0xdd");
+            String stringcmd = HexUtils.bytesToHexString(commands);
+            System.out.println("joe---------" + stringcmd);
+        } catch (ParamsNumNotMatchVarNumException | NotInitProtocolException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -57,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 }

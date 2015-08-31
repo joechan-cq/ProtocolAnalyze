@@ -12,6 +12,16 @@ public class Protocol {
 
     private List<BodyItem> body;
 
+    public boolean isValid() {
+        return isValid;
+    }
+
+    public void setIsValid(boolean isValid) {
+        this.isValid = isValid;
+    }
+
+    private boolean isValid = false;
+
     public List<BodyItem> getBody() {
         return body;
     }

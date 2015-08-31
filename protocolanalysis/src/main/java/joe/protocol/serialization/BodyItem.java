@@ -10,6 +10,8 @@ public class BodyItem {
 
     private String value;
 
+    private String defaultvalue;
+
     private String formula;
 
     public String getFormula() {
@@ -32,13 +34,22 @@ public class BodyItem {
         return value;
     }
 
+    public String getDefaultvalue() {
+        return defaultvalue;
+    }
+
+    public void setDefaultvalue(String defaultvalue) {
+        this.defaultvalue = defaultvalue;
+    }
+
     public void setValue(String value) {
         this.value = value;
     }
 
-    public BodyItem(String type, String value, String formula) {
+    public BodyItem(String type, String value, String defaultvalue, String formula) {
         this.type = type;
         this.value = value;
+        this.defaultvalue = defaultvalue;
         this.formula = formula;
     }
 
