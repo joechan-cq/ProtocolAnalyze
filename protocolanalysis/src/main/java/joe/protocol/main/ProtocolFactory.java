@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,8 +25,6 @@ public class ProtocolFactory {
     private static final String LENGTH = "length";
 
     private static final String BODY = "body";
-
-    private static final String BODY_ITEM = "bodyitem";
 
     private static final String TYPE = "type";
 
@@ -56,7 +56,28 @@ public class ProtocolFactory {
         protocol = new Protocol();
     }
 
+    public boolean initProtocol(String filePath, String fileName) {
+        File file = new File(filePath, fileName);
+        return initProtocol(file);
+    }
+
     public boolean initProtocol(File file) {
+        String jsonStr = "";
+        try {
+            FileInputStream in = new FileInputStream(file);
+            int size = in.available();
+            byte[] buffer = new byte[size];
+            in.read(buffer);
+            in.close();
+            jsonStr = new String(buffer, "UTF-8");
+            initProtocol(jsonStr);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        } catch (ConstantsValueNullException e) {
+            e.printStackTrace();
+            return false;
+        }
         return true;
     }
 
