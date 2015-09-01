@@ -15,37 +15,43 @@ import joe.protocol.utils.HexUtils;
 public class MainActivity extends AppCompatActivity {
 
     private String jsonstring = "{\n" +
-            "\"length\": 7,\n" +
-            "\"body\": [{\n" +
-            "\"type\": \"constants\",\n" +
-            "\"value\": \"0xa5\"\n" +
-            "},\n" +
-            "{\n" +
-            "\"type\": \"constants\",\n" +
-            "\"value\": \"0xb5\"\n" +
-            "},\n" +
-            "{\n" +
-            "\"type\": \"var\"\n" +
-            "},\n" +
-            "{\n" +
-            "\"type\": \"var\"\n" +
-            "},\n" +
-            "{\n" +
-            "\"type\": \"constants\",\n" +
-            "\"value\": \"0xc5\"\n" +
-            "},\n" +
-            "{\n" +
-            "\"type\": \"enum\",\n" +
-            "\"valueMap\": {\n" +
-            "\"powerup\": \"0x11\",\n" +
-            "\"powerdown\": \"0x22\"\n" +
-            "}\n" +
-            "},\n" +
-            "{\n" +
-            "\"type\": \"constants\",\n" +
-            "\"value\": \"0xa5\"\n" +
-            "}\n" +
-            "]\n" +
+            "    \"length\": 8,\n" +
+            "    \"body\": [\n" +
+            "        {\n" +
+            "            \"type\": \"constants\",\n" +
+            "            \"value\": \"0xa5\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"constants\",\n" +
+            "            \"value\": \"0xb5\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"var\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"var\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"constants\",\n" +
+            "            \"value\": \"0xc5\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"enum\",\n" +
+            "            \"valueMap\": {\n" +
+            "                \"powerup\": \"0x11\",\n" +
+            "                \"powerdown\": \"0x22\"\n" +
+            "            }\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"constants\",\n" +
+            "            \"value\": \"0xa5\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"crc8\",\n" +
+            "            \"offset\": 1,\n" +
+            "            \"len\": 2\n" +
+            "        }\n" +
+            "    ]\n" +
             "}";
 
     private TextView tv;

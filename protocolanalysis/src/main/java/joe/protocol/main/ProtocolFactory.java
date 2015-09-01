@@ -27,18 +27,16 @@ public class ProtocolFactory {
 
     private static final String BODY = "body";
 
-    private static final String TYPE = "type";
-
-    private static final String VALUE = "value";
-
-    private static final String FORMULA = "formula";
-
     //  1
     private static final String CONSTANTS = "constants";
     //  2
     private static final String VAR = "var";
     //  3
     private static final String ENUM = "enum";
+    //  4
+    private static final String CRC8 = "crc8";
+    //  5
+    private static final String CRC16 = "crc16";
 
     private static final byte DEFAULT_VALUE = 0x00;
 
@@ -46,6 +44,10 @@ public class ProtocolFactory {
     private static final String VAR_SYMBOL = "vr";
     //  枚举替代符
     private static final String ENUM_SYMBOL = "em";
+    //  CRC8替代符
+    private static final String CRC8_SYMBOL = "crc8";
+    //  CRC16替代符
+    private static final String CRC16_SYMBOL = "crc16";
 
     private Protocol protocol;
 
@@ -141,6 +143,16 @@ public class ProtocolFactory {
                     throw new ConstantsValueNullException();
                 }
             }
+            if (item.getType().equals(CRC8)) {
+                cmdTypes[i] = 4;
+                stringCommand = stringCommand + " " + CRC8_SYMBOL;
+                bytesCommand[i] = DEFAULT_VALUE;
+            }
+            if (item.getType().equals(CRC16)) {
+                cmdTypes[i] = 5;
+                stringCommand = stringCommand + " " + CRC16_SYMBOL;
+                bytesCommand[i] = DEFAULT_VALUE;
+            }
         }
         protocol.setBody(items);
         protocol.setIsValid(true);
@@ -162,6 +174,7 @@ public class ProtocolFactory {
         if (params.length < varNums) {
             throw new ParamNumNotMatchVarNumException();
         }
+        byte[] tempbyte = bytesCommand;
         int point = 0;
         for (int i = 0; i < protocol.getLength(); i++) {
             switch (cmdTypes[i]) {
@@ -169,16 +182,38 @@ public class ProtocolFactory {
                     break;
                 case 2:
                     stringCommand = stringCommand.replaceFirst(VAR_SYMBOL, params[point]);
+                    String value1 = params[point].toLowerCase().trim();
+                    value1 = value1.contains("0x") ? value1.replace("0x", "") : value1;
+                    tempbyte[i] = HexUtils.hexStr2Bytes(value1)[0];
                     point++;
                     break;
                 case 3:
                     if (protocol.getBody().get(i).getValueMap().containsKey(params[point])) {
-                        String value = protocol.getBody().get(i).getValueMap().get(params[point]);
-                        stringCommand = stringCommand.replaceFirst(ENUM_SYMBOL, value);
+                        String value2 = protocol.getBody().get(i).getValueMap().get(params[point]);
+                        stringCommand = stringCommand.replaceFirst(ENUM_SYMBOL, value2);
+                        String map_value = value2.toLowerCase().trim();
+                        map_value = map_value.contains("0x") ? map_value.replace("0x", "") : map_value;
+                        tempbyte[i] = HexUtils.hexStr2Bytes(map_value)[0];
                         point++;
                     } else {
                         throw new InvalidEnumKeyException();
                     }
+                    break;
+                case 4: //CRC8校验
+                    int offset8 = protocol.getBody().get(i).getOffset();
+                    int len8 = protocol.getBody().get(i).getLen();
+                    byte[] crc8 = new byte[1];
+                    crc8[0] = joe.protocol.utils.CRC8.calcCrc8(tempbyte, offset8, len8);
+                    tempbyte[i] = crc8[0];
+                    stringCommand = stringCommand.replaceFirst(CRC8_SYMBOL, HexUtils.bytesToHexString(crc8));
+                    break;
+                case 5: //CRC16校验
+                    int offset16 = protocol.getBody().get(i).getOffset();
+                    int len16 = protocol.getBody().get(i).getLen();
+                    byte[] crc16 = new byte[1];
+                    crc16[0] = joe.protocol.utils.CRC8.calcCrc8(tempbyte, offset16, len16);
+                    tempbyte[i] = crc16[0];
+                    stringCommand = stringCommand.replaceFirst(CRC16_SYMBOL, HexUtils.bytesToHexString(crc16));
                     break;
             }
         }
@@ -200,6 +235,7 @@ public class ProtocolFactory {
         if (params.length < varNums) {
             throw new ParamNumNotMatchVarNumException();
         }
+        byte[] tempbyte = bytesCommand;
         int point = 0;
         for (int i = 0; i < protocol.getLength(); i++) {
             switch (cmdTypes[i]) {
@@ -207,12 +243,24 @@ public class ProtocolFactory {
                     break;
                 case 2:
                 case 3:
-                    bytesCommand[i] = params[point];
+                    tempbyte[i] = params[point];
                     point++;
+                    break;
+                case 4:
+                    int offset8 = protocol.getBody().get(i).getOffset();
+                    int len8 = protocol.getBody().get(i).getLen();
+                    byte crc8 = joe.protocol.utils.CRC8.calcCrc8(tempbyte, offset8, len8);
+                    tempbyte[i] = crc8;
+                    break;
+                case 5:
+                    int offset16 = protocol.getBody().get(i).getOffset();
+                    int len16 = protocol.getBody().get(i).getLen();
+                    byte crc16 = joe.protocol.utils.CRC8.calcCrc8(tempbyte, offset16, len16);
+                    tempbyte[i] = crc16;
                     break;
             }
         }
-        return bytesCommand;
+        return tempbyte;
     }
 
     /**
@@ -231,6 +279,7 @@ public class ProtocolFactory {
         if (params.length < varNums) {
             throw new ParamNumNotMatchVarNumException();
         }
+        byte[] tempbyte = bytesCommand;
         int point = 0;
         for (int i = 0; i < protocol.getLength(); i++) {
             switch (cmdTypes[i]) {
@@ -239,7 +288,7 @@ public class ProtocolFactory {
                 case 2:
                     String value = params[point].toLowerCase().trim();
                     value = value.contains("0x") ? value.replace("0x", "") : value;
-                    bytesCommand[i] = HexUtils.hexStr2Bytes(value)[0];
+                    tempbyte[i] = HexUtils.hexStr2Bytes(value)[0];
                     point++;
                     break;
                 case 3:
@@ -247,14 +296,26 @@ public class ProtocolFactory {
                     if (protocol.getBody().get(i).getValueMap().containsKey(key)) {
                         String map_value = protocol.getBody().get(i).getValueMap().get(key).toLowerCase().trim();
                         map_value = map_value.contains("0x") ? map_value.replace("0x", "") : map_value;
-                        bytesCommand[i] = HexUtils.hexStr2Bytes(map_value)[0];
+                        tempbyte[i] = HexUtils.hexStr2Bytes(map_value)[0];
                         point++;
                     } else {
                         throw new InvalidEnumKeyException();
                     }
                     break;
+                case 4:
+                    int offset8 = protocol.getBody().get(i).getOffset();
+                    int len8 = protocol.getBody().get(i).getLen();
+                    byte crc8 = joe.protocol.utils.CRC8.calcCrc8(tempbyte, offset8, len8);
+                    tempbyte[i] = crc8;
+                    break;
+                case 5:
+                    int offset16 = protocol.getBody().get(i).getOffset();
+                    int len16 = protocol.getBody().get(i).getLen();
+                    byte crc16 = joe.protocol.utils.CRC8.calcCrc8(tempbyte, offset16, len16);
+                    tempbyte[i] = crc16;
+                    break;
             }
         }
-        return bytesCommand;
+        return tempbyte;
     }
 }
