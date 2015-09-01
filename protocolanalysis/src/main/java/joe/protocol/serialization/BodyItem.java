@@ -1,5 +1,7 @@
 package joe.protocol.serialization;
 
+import java.util.HashMap;
+
 /**
  * Description
  * Created by chenqiao on 2015/8/31.
@@ -13,6 +15,8 @@ public class BodyItem {
     private String defaultvalue;
 
     private String formula;
+
+    private HashMap<String, String> valueMap;
 
     public String getFormula() {
         return formula;
@@ -46,11 +50,20 @@ public class BodyItem {
         this.value = value;
     }
 
-    public BodyItem(String type, String value, String defaultvalue, String formula) {
+    public HashMap<String, String> getValueMap() {
+        return valueMap;
+    }
+
+    public void setValueMap(HashMap<String, String> valueMap) {
+        this.valueMap = valueMap;
+    }
+
+    public BodyItem(String type, String value, String defaultvalue, String formula, HashMap<String, String> valueMap) {
         this.type = type;
         this.value = value;
         this.defaultvalue = defaultvalue;
         this.formula = formula;
+        this.valueMap = valueMap;
     }
 
     public BodyItem() {
