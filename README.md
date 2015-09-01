@@ -1,6 +1,8 @@
 # ProtocolAnalyze
 协议解析框架
 ============
+#Author
+###Joe,	zhk
 #用途
 使用此框架，可以实现协议数据部分与客户端的解耦。在客户端开发中，发送byte指令将无需进行拼接以及每个byte的计算。<br>
 根据协议定义，可直接使用K-V形式传入自定义的Key，框架将自动拼接好byte命令进行回传。使得开发代码的可读性大大提升。
@@ -44,6 +46,6 @@
 <br>
 <br>
 ##框架使用
-1.实例化ProtocolFactory，然后调用initProtocol进行协议解析。
-2.调用ProtocolFactory中的方法，按照顺序传入参数（var和enum类型），可获取到拼接完成的不同形式的命令。
-3.遇到enum类型，将会自动通过K-V形式，取出Value进行命令拼接。
+1.实例化ProtocolFactory，然后调用initProtocol进行协议解析。<br>
+2.调用ProtocolFactory中的方法，按照顺序传入参数（var和enum类型），可获取到拼接完成的不同形式的命令。<br>
+3.遇到enum类型，将会自动通过K-V形式，取出Value进行命令拼接。<br>
