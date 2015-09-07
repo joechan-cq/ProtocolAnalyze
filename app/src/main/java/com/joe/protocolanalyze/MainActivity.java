@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import joe.protocol.main.ProtocolFactory;
-import joe.protocol.throwable.BodyNumsNotMatchDefLength;
+import joe.protocol.throwable.BodyLengthNotMatchDefLenException;
 import joe.protocol.throwable.ConstantsValueNullException;
 import joe.protocol.throwable.InvalidEnumKeyException;
 import joe.protocol.throwable.NotInitProtocolException;
@@ -15,44 +15,71 @@ import joe.protocol.utils.HexUtils;
 public class MainActivity extends AppCompatActivity {
 
     private String jsonstring = "{\n" +
-            "    \"length\": 8,\n" +
+            "    \"length\": 15,\n" +
             "    \"body\": [\n" +
             "        {\n" +
             "            \"type\": \"constants\",\n" +
-            "            \"value\": \"0xa5\"\n" +
+            "            \"value\": \"0xaa\"\n" +
             "        },\n" +
             "        {\n" +
             "            \"type\": \"constants\",\n" +
-            "            \"value\": \"0xb5\"\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"type\": \"var\"\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"type\": \"var\"\n" +
+            "            \"value\": \"0x09\"\n" +
             "        },\n" +
             "        {\n" +
             "            \"type\": \"constants\",\n" +
-            "            \"value\": \"0xc5\"\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"type\": \"enum\",\n" +
-            "            \"valueMap\": {\n" +
-            "                \"powerup\": \"0x11\",\n" +
-            "                \"powerdown\": \"0x22\"\n" +
-            "            }\n" +
+            "            \"value\": \"0x01\"\n" +
             "        },\n" +
             "        {\n" +
             "            \"type\": \"constants\",\n" +
-            "            \"value\": \"0xa5\"\n" +
+            "            \"value\": \"0x01\"\n" +
             "        },\n" +
             "        {\n" +
-            "            \"type\": \"crc8\",\n" +
+            "            \"type\": \"constants\",\n" +
+            "            \"value\": \"0x01\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"constants\",\n" +
+            "            \"value\": \"0x00\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"constants\",\n" +
+            "            \"value\": \"0x00\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"constants\",\n" +
+            "            \"value\": \"0x00\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"constants\",\n" +
+            "            \"value\": \"0x00\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"constants\",\n" +
+            "            \"value\": \"0x00\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"constants\",\n" +
+            "            \"value\": \"0x00\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"constants\",\n" +
+            "            \"value\": \"0x01\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"constants\",\n" +
+            "            \"value\": \"0xff\"\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"CRC8\",\n" +
             "            \"offset\": 1,\n" +
-            "            \"len\": 2\n" +
+            "            \"len\": 12\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"type\": \"constants\",\n" +
+            "            \"value\": \"0x55\"\n" +
             "        }\n" +
             "    ]\n" +
-            "}";
+            "}\n";
 
     private TextView tv;
 
@@ -64,12 +91,12 @@ public class MainActivity extends AppCompatActivity {
         ProtocolFactory factory = new ProtocolFactory();
         try {
             factory.initProtocol(jsonstring);
-        } catch (ConstantsValueNullException | BodyNumsNotMatchDefLength e) {
+        } catch (ConstantsValueNullException | BodyLengthNotMatchDefLenException e) {
             e.printStackTrace();
         }
         try {
             byte[] commands;
-            commands = factory.getBytesCommands("0xaa", "0xbb", "powerup");
+            commands = factory.getBytesCommands();
             tv.setText(HexUtils.bytesToHexString(commands));
         } catch (ParamNumNotMatchVarNumException | NotInitProtocolException | InvalidEnumKeyException e) {
             e.printStackTrace();
