@@ -21,6 +21,7 @@ import joe.protocol.throwable.InvalidEnumKeyException;
 import joe.protocol.throwable.InvalidEnumValueException;
 import joe.protocol.throwable.NotInitProtocolException;
 import joe.protocol.throwable.ParamNumNotMatchVarNumException;
+import joe.protocol.utils.CRC16;
 import joe.protocol.utils.HexUtils;
 
 /**
@@ -42,7 +43,9 @@ public class ProtocolFactory {
     //  4
     private static final String CRC8 = "crc8";
     //  5
-    private static final String CRC16 = "crc16";
+    private static final String CRC16_HIGH = "crc16_h";
+    //  6
+    private static final String CRC16_LOW = "crc16_l";
 
     private static final byte DEFAULT_VALUE = 0x00;
 
@@ -52,8 +55,10 @@ public class ProtocolFactory {
     private static final String ENUM_SYMBOL = "em";
     //  CRC8替代符
     private static final String CRC8_SYMBOL = "crc8";
-    //  CRC16替代符
-    private static final String CRC16_SYMBOL = "crc16";
+    //  CRC16高位替代符
+    private static final String CRC16_H_SYMBOL = "crc16high";
+    //  CRC16低位替代符
+    private static final String CRC16_L_SYMBOL = "crc16low";
 
     private Protocol protocol;
 
@@ -154,11 +159,16 @@ public class ProtocolFactory {
                 stringCommand = stringCommand + " " + CRC8_SYMBOL;
                 bytesCommand[i] = DEFAULT_VALUE;
             }
-//            if (item.getType().equals(CRC16)) {
-//                cmdTypes[i] = 5;
-//                stringCommand = stringCommand + " " + CRC16_SYMBOL;
-//                bytesCommand[i] = DEFAULT_VALUE;
-//            }
+            if (item.getType().equals(CRC16_HIGH)) {
+                cmdTypes[i] = 5;
+                stringCommand = stringCommand + " " + CRC16_H_SYMBOL;
+                bytesCommand[i] = DEFAULT_VALUE;
+            }
+            if (item.getType().equals(CRC16_LOW)) {
+                cmdTypes[i] = 6;
+                stringCommand = stringCommand + " " + CRC16_L_SYMBOL;
+                bytesCommand[i] = DEFAULT_VALUE;
+            }
         }
         protocol.setBody(items);
         protocol.setIsValid(true);
@@ -213,14 +223,20 @@ public class ProtocolFactory {
                     tempbyte[i] = crc8[0];
                     stringCommand = stringCommand.replaceFirst(CRC8_SYMBOL, HexUtils.bytesToHexString(crc8));
                     break;
-//                case 5: //CRC16校验
-//                    int offset16 = protocol.getBody().get(i).getOffset();
-//                    int len16 = protocol.getBody().get(i).getLen();
-//                    byte[] crc16 = new byte[1];
-//                    crc16[0] = joe.protocol.utils.CRC8.calcCrc8(tempbyte, offset16, len16);
-//                    tempbyte[i] = crc16[0];
-//                    stringCommand = stringCommand.replaceFirst(CRC16_SYMBOL, HexUtils.bytesToHexString(crc16));
-//                    break;
+                case 5: //CRC16校验-高位
+                    int offset16h = protocol.getBody().get(i).getOffset();
+                    int len16h = protocol.getBody().get(i).getLen();
+                    int crc16h = joe.protocol.utils.CRC16.calcCrc16(tempbyte, offset16h, len16h);
+                    tempbyte[i] = (byte) ((crc16h & 0xff00) >> 8);
+                    stringCommand = stringCommand.replaceFirst(CRC16_H_SYMBOL, HexUtils.bytesToHexString(new byte[]{tempbyte[i]}));
+                    break;
+                case 6: //CRC16校验-低位
+                    int offset16l = protocol.getBody().get(i).getOffset();
+                    int len16l = protocol.getBody().get(i).getLen();
+                    int crc16l = CRC16.calcCrc16(tempbyte, offset16l, len16l);
+                    tempbyte[i] = (byte) (crc16l & 0x00ff);
+                    stringCommand = stringCommand.replaceFirst(CRC16_L_SYMBOL, HexUtils.bytesToHexString(new byte[]{tempbyte[i]}));
+                    break;
             }
         }
         return stringCommand.toLowerCase().trim();
@@ -258,12 +274,18 @@ public class ProtocolFactory {
                     byte crc8 = joe.protocol.utils.CRC8.calcCrc8(tempbyte, offset8, len8);
                     tempbyte[i] = crc8;
                     break;
-//                case 5:
-//                    int offset16 = protocol.getBody().get(i).getOffset();
-//                    int len16 = protocol.getBody().get(i).getLen();
-//                    byte crc16 = joe.protocol.utils.CRC8.calcCrc8(tempbyte, offset16, len16);
-//                    tempbyte[i] = crc16;
-//                    break;
+                case 5:
+                    int offset16h = protocol.getBody().get(i).getOffset();
+                    int len16h = protocol.getBody().get(i).getLen();
+                    int crc16h = CRC16.calcCrc16(tempbyte, offset16h, len16h);
+                    tempbyte[i] = (byte) ((crc16h & 0xff00) >> 8);
+                    break;
+                case 6:
+                    int offset16l = protocol.getBody().get(i).getOffset();
+                    int len16l = protocol.getBody().get(i).getLen();
+                    int crc16l = CRC16.calcCrc16(tempbyte, offset16l, len16l);
+                    tempbyte[i] = (byte) (crc16l & 0x00ff);
+                    break;
             }
         }
         return tempbyte;
@@ -314,12 +336,18 @@ public class ProtocolFactory {
                     byte crc8 = joe.protocol.utils.CRC8.calcCrc8(tempbyte, offset8, len8);
                     tempbyte[i] = crc8;
                     break;
-//                case 5:
-//                    int offset16 = protocol.getBody().get(i).getOffset();
-//                    int len16 = protocol.getBody().get(i).getLen();
-//                    byte crc16 = joe.protocol.utils.CRC8.calcCrc8(tempbyte, offset16, len16);
-//                    tempbyte[i] = crc16;
-//                    break;
+                case 5:
+                    int offset16h = protocol.getBody().get(i).getOffset();
+                    int len16h = protocol.getBody().get(i).getLen();
+                    int crc16h = CRC16.calcCrc16(tempbyte, offset16h, len16h);
+                    tempbyte[i] = (byte) ((crc16h & 0xff00) >> 8);
+                    break;
+                case 6:
+                    int offset16l = protocol.getBody().get(i).getOffset();
+                    int len16l = protocol.getBody().get(i).getLen();
+                    int crc16l = CRC16.calcCrc16(tempbyte, offset16l, len16l);
+                    tempbyte[i] = (byte) (crc16l & 0x00ff);
+                    break;
             }
         }
         return tempbyte;
@@ -374,6 +402,30 @@ public class ProtocolFactory {
                     it.put("value", "0x" + HexUtils.bytesToHexString(new byte[]{crc8}).toLowerCase().trim());
                 } else {
                     throw new CheckErrorException("crc8 check is error");
+                }
+            }
+            if (item.getType().equals(CRC16_HIGH)) {
+                int offset16h = item.getOffset();
+                int len16h = item.getLen();
+                int crc16h = CRC16.calcCrc16(cmds, offset16h, len16h);
+                byte value = (byte) ((crc16h & 0xff00) >> 8);
+                if (value == cmds[i]) {
+                    it.put("type", CRC16_HIGH);
+                    it.put("value", "0x" + HexUtils.bytesToHexString(new byte[]{value}).toLowerCase().trim());
+                } else {
+                    throw new CheckErrorException("crc16 check is error");
+                }
+            }
+            if (item.getType().equals(CRC16_LOW)) {
+                int offset16l = item.getOffset();
+                int len16l = item.getLen();
+                int crc16l = CRC16.calcCrc16(cmds, offset16l, len16l);
+                byte value = (byte) (crc16l & 0x00ff);
+                if (value == cmds[i]) {
+                    it.put("type", CRC16_LOW);
+                    it.put("value", "0x" + HexUtils.bytesToHexString(new byte[]{value}).toLowerCase().trim());
+                } else {
+                    throw new CheckErrorException("crc16 check is error");
                 }
             }
             body.put(it);
