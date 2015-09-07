@@ -12,7 +12,7 @@
 ##1.协议定义
 以json形式描述协议内容，例如：<br>
 {
-	"length": 4,
+	"length": 6,
 	"body": [
 	{
 		"type": "constants",
@@ -32,6 +32,16 @@
 		"type": "crc8",
 		"offset": 1,
 		"len": 2
+	},
+	{
+		"type": "crc16_h",
+		"offset": 1,
+		"len": 2
+	},
+	{
+		"type": "crc16_l",
+		"offset": 1,
+		"len": 2
 	}
 	]
 }<br>
@@ -42,7 +52,7 @@
 ###body
 协议具体内容
 ####type
-该命令类型，有constants常量类型，var变量类型，enum枚举类型
+该命令类型，有constants常量类型，var变量类型，enum枚举类型,crc8校验类型,crc16_h和crc16_l校验类型
 #####constants
 与value配对使用，定义协议中的常量值
 #####var
@@ -52,7 +62,7 @@
 #####crc8
 定义协议中的校验码类型，必须与offset和len配套使用，且为了防止错误，尽量将校验位放在后面。
 #####crc16
-同crc8
+因为16位校验，有2个byte，因此分为类型crc16_h和crc16_l。<br>会根据类型进行不同计算赋值。其余参数同crc8。
 <br>
 <br>
 ##框架使用
@@ -60,3 +70,4 @@
 2.调用ProtocolFactory中的方法，按照顺序传入参数（var和enum类型），可获取到拼接完成的不同形式的命令。<br>
 3.遇到enum类型，将会自动通过K-V形式，取出Value进行命令拼接。<br>
 4.crc8和crc16的校验位，将会在调用get方法时自动计算，无需人为计算。<br>
+5.添加传入完整byte[]命令，自动解析成协议格式的json数据的方法analyzeCommands(待测验)。<br>
